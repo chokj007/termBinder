@@ -1,5 +1,5 @@
 /* Term Binder offline cache. Bump VERSION when you replace index.html. */
-var VERSION = 'term-binder-v3';
+var VERSION = 'term-binder-v4';
 var SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {

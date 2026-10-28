@@ -118,6 +118,7 @@ main{min-width:0;display:flex;flex-direction:column;gap:20px}
 .blk strong{font-weight:600;display:flex;align-items:center;gap:8px;overflow-wrap:anywhere}
 .blk .time{font-family:var(--mono);font-size:11.5px;opacity:.9}
 a.blk:hover{filter:brightness(.97)}
+.blk.flex{opacity:.62;border-style:dashed}
 .due{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border:1px dashed var(--line);border-radius:8px;font-size:13px;color:var(--ink)}
 .due .dia{width:9px;height:9px;background:var(--c);transform:rotate(45deg);margin-top:5px;flex:none}
 .due.done{color:var(--mute);text-decoration:line-through}
@@ -288,7 +289,7 @@ var A_OV={'2026-11-04':[mins(11,30),mins(14)],'2026-11-09':[mins(12,30),mins(15)
 var APPT={'2026-10-26':'Appointment in the afternoon. Nespresso moves to 5:00 to 7:00 PM.','2026-11-04':'Morning appointment. Block A 11:30 to 2:00, Nespresso 3:00 to 5:00.','2026-11-09':'Appointment. Block A 12:30 to 3:00, Nespresso 3:15 to 5:15.','2026-11-11':'Appointment. Block A 12:15 to 2:45, Nespresso 3:15 to 5:15.','2026-11-13':'Appointment. Block A 11:30 to 2:00, open studio 3:00 to 4:30, review 4:30 to 5:00.'};
 var ST1='Stage 1 (9:30 to 10:45): research and outreach for 2 new companies, 5 people each, half templated and half personalized. Break 10:45 to 11:00. Stage 2 (11:00 to 12:00): submit companies whose outreach is 2 or more days old, resume test first.';
 
-function blocksFor(d){
+function blocksBase(d){
   var k=iso(d),dow=d.getDay(),out=[];
   function B(type,title,s,e,note,proj){out.push({type:type,title:title,s:s,e:e,note:note||'',proj:proj||null,date:k});}
   if(dow===0){ if(SETUP.indexOf(k)>=0) B('setup','Sunday setup',mins(17),mins(17,20),'Pick next week\'s 10 companies from the target list and glance at the calendar.',null); return out; }
@@ -317,6 +318,7 @@ function blocksFor(d){
   if(dow===5){
     if(k==='2026-10-30') B('studio','Creative brief',mins(13),mins(15,30),'Capped at 2.5 hours. Finished-ugly counts, paper is fine.','briefs');
     else if(k==='2026-11-13') B('studio','Creative brief (shortened)',mins(15),mins(16,30),'Shortened to 1.5 hours.','briefs');
+    else if(k==='2026-11-06') B('studio','Creative brief #1 (catch-up)',mins(13),mins(15,30),'Moved from Oct 30 for the flexible week. Capped at 2.5 hours, finished-ugly counts.','briefs');
     else if(k!=='2026-11-27') B('studio','New product brainstorm',mins(13),mins(15,30),'Goal: a one-page idea brief by Dec 4.','product');
     if(k==='2026-11-13') B('review','Weekly review',mins(16,30),mins(17),'Count the week, then show one thing to a real person.',null);
     else B('review','Weekly review',mins(15,30),mins(16),'Count the week, then show one thing to a real person.',null);
@@ -324,6 +326,8 @@ function blocksFor(d){
   out.sort(function(a,b){return a.s-b.s;});
   return out;
 }
+var FLEX={'2026-10-28':1,'2026-10-29':1,'2026-10-30':1,'2026-10-31':1,'2026-11-01':1};
+function blocksFor(d){var o=blocksBase(d);if(FLEX[iso(d)])o.forEach(function(b){if(b.type==='checkin'||b.type==='workout'||b.type==='setup')return;b.title='Flex: '+b.title;b.note='Optional this week, skip freely. '+b.note;b.flex=true;});return o;}
 var TERM_DAYS=[];(function(){for(var d=addDays(TERM_START,-1),i=0;i<=40;i++){TERM_DAYS.push(addDays(d,i));}})();
 
 /* ---------- classes and milestones ---------- */
@@ -352,35 +356,35 @@ var PROJECTS=[
 ];
 var PBY={};PROJECTS.forEach(function(p){PBY[p.key]=p;});
 var MILESTONES=[
- {id:'a1',proj:'apps',date:'2026-10-30',title:'Week 1: 10 applications submitted',detail:'Figma and Perplexity go first. Mon and Tue run extra outreach batches.'},
+ {id:'a1',proj:'apps',date:'2026-10-30',title:'Week 1: 2 applications submitted (flexible week)',detail:'Outreach first. Figma and Perplexity go first, make connections before submitting. White Circle outreach was sent Oct 28.'},
  {id:'a2',proj:'apps',date:'2026-11-06',title:'Week 2: 10 applications submitted'},
  {id:'a3',proj:'apps',date:'2026-11-13',title:'Week 3: 10 applications submitted'},
  {id:'a4',proj:'apps',date:'2026-11-20',title:'Week 4: 10 applications submitted'},
  {id:'a5',proj:'apps',date:'2026-11-27',title:'Week 5: 8 applications submitted',detail:'Thanksgiving week, lighter target.'},
  {id:'a6',proj:'apps',date:'2026-12-04',title:'Week 6: 10 applications submitted'},
- {id:'n1',proj:'nespresso',date:'2026-11-06',title:'Research and dataset done, system architecture sketched'},
+ {id:'n1',proj:'nespresso',date:'2026-11-06',title:'Research and dataset done, system architecture sketched',detail:'May slide a week if the flexible week carries over. Decide Mon Nov 2. The Nov 16 midterm is the one to protect.'},
  {id:'n2',proj:'nespresso',date:'2026-11-16',title:'Midterm: first AI-proposed output to show',detail:'Moved from Nov 13 because of appointments.'},
  {id:'n3',proj:'nespresso',date:'2026-11-20',title:'Visual system and semi-generator working'},
  {id:'n4',proj:'nespresso',date:'2026-12-04',title:'Case study draft ready'},
  {id:'p1',proj:'publication',date:'2026-11-13',title:'Layout done',detail:'Self-set placeholder, no outside deadline.'},
  {id:'p2',proj:'publication',date:'2026-12-04',title:'Illustrations done',detail:'Self-set placeholder, no outside deadline.'},
- {id:'r1',proj:'portfolio',date:'2026-11-05',title:'Ulama case study shortened',detail:'Cuts go into the Ulama deck vault folder.'},
+ {id:'r1',proj:'portfolio',date:'2026-11-05',title:'Ulama case study shortened',detail:'Cuts go into the Ulama deck vault folder. May slide if the flexible week carries over. Decide Mon Nov 2.'},
  {id:'r2',proj:'portfolio',date:'2026-11-12',title:'Alternew case study shortened',detail:'Cuts go into the Alternew deck vault folder.'},
  {id:'r3',proj:'portfolio',date:'2026-11-19',title:'HHC case study shortened',detail:'Cuts go into the HHC deck vault folder.'},
  {id:'r4',proj:'portfolio',date:'2026-12-03',title:'Start building the deck',detail:'Replaces revision. Nov 26 is Thanksgiving, so there is no session that day.'},
- {id:'b1',proj:'briefs',date:'2026-10-30',title:'Creative brief #1',detail:'2.5 hour cap. Finished-ugly counts.'},
+ {id:'b1',proj:'briefs',date:'2026-11-06',title:'Creative brief #1',detail:'Moved from Oct 30 for the flexible week. 2.5 hour cap. Finished-ugly counts.'},
  {id:'b2',proj:'briefs',date:'2026-11-13',title:'Creative brief #2 (shortened)',detail:'1.5 hours because of the appointment.'},
  {id:'x1',proj:'product',date:'2026-12-04',title:'One-page idea brief',detail:'The problem, who it\'s for, three rough concepts.'},
- {id:'s1',proj:'skills',date:'2026-10-29',title:'Make or learn one small thing',detail:'Suggested: Figma updates. Show it Friday.'},
+ {id:'s1',proj:'skills',date:'2026-10-29',title:'Optional: make or learn one small thing',detail:'Flexible week, skip freely. Suggested: Figma updates.'},
  {id:'s2',proj:'skills',date:'2026-11-05',title:'Make or learn one small thing',detail:'Suggested: Blender. Show it Friday.'},
  {id:'s3',proj:'skills',date:'2026-11-12',title:'Make or learn one small thing',detail:'Suggested: creative coding. Show it Friday.'},
  {id:'s4',proj:'skills',date:'2026-11-19',title:'Make or learn one small thing',detail:'Suggested: Figma updates. Show it Friday.'},
  {id:'s5',proj:'skills',date:'2026-12-03',title:'Make or learn one small thing',detail:'Suggested: Blender. Show it Friday.'}
 ];
-var APP_GOAL=[10,10,10,10,8,10];
+var APP_GOAL=[2,10,10,10,8,10];
 var WEEK_NOTES=[
- ['Figma and Perplexity go first. Make connections before submitting.','Mon and Tue run extra outreach batches, since nothing is 2 days old yet.','Mon Oct 26: Nespresso moves to 5:00 to 7:00 PM.'],
- ['Wed Nov 4 is an appointment day: Block A 11:30 to 2:00, Nespresso 3:00 to 5:00.','Nespresso milestone Fri Nov 6, Ulama shortened Thu Nov 5.'],
+ ['Flexible week, Oct 28 to Nov 1: 1 hour a day at most, any time. Blocks are optional and shown dashed.','Done: White Circle outreach sent (Elena, Anvar, Liam, Denis). Next: read the Figma and IDEO roles, then Figma outreach.','Mon Nov 2: possible call with TJ (recruiter), 12:15 or 4:15 PM ET, once he confirms.'],
+ ['Wed Nov 4 is an appointment day: Block A 11:30 to 2:00, Nespresso 3:00 to 5:00.','Nespresso milestone Fri Nov 6, Ulama shortened Thu Nov 5. Both may slide, decide Mon Nov 2.','Fri Nov 6: open studio is the catch-up for creative brief #1.'],
  ['Appointment days: Mon Nov 9, Wed Nov 11, Fri Nov 13. Block B trims to about 2 hours.','Fri Nov 13: open studio is a shortened creative brief, review runs 4:30 to 5:00.','Alternew shortened Thu Nov 12. Publication layout Fri Nov 13.'],
  ['Nespresso midterm on Mon Nov 16. Show it to a real person.','HHC shortened Thu Nov 19. Visual system and semi-generator Fri Nov 20.'],
  ['Thanksgiving week. Thu Nov 26 has no blocks.','Fri Nov 27 has Block A, check-in and review only. No open studio.','Application target is 8 this week.'],
@@ -472,7 +476,7 @@ function statusOf(it){
 }
 function blockHtml(b){
   var inner='<span class="time">'+trange(b.s,b.e)+'</span><strong><span class="sw"></span>'+esc(b.title)+'</strong>';
-  var cls='blk tint t-'+b.type;
+  var cls='blk tint t-'+b.type+(b.flex?' flex':'');
   return b.proj?'<a class="'+cls+'" href="#'+b.proj+'" title="'+esc(b.note)+'">'+inner+'</a>':'<div class="'+cls+'" title="'+esc(b.note)+'">'+inner+'</div>';
 }
 function dueHtml(it){
